@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotate Animation</title>
+
+    <style>
+        .box {
+            width: 80px;
+            height: 80px;
+            background: rgb(54, 181, 98);
+            border-radius: 6px;
+
+            /* Only rotation */
+            animation: rotatebox 2s infinite linear;
+        }
+
+        @keyframes rotatebox {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(180deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="box"></div>
+
+</body>
+</html>

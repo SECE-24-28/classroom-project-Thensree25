@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Password Generator</title>
+
+<style>
+  :root{
+    --bg1:#6a00ff;
+    --bg2:#3b82f6;
+    --card-bg:rgba(255,255,255,0.18);
+    --card-border:rgba(255,255,255,0.35);
+    --button:#7c3aed;
+    --button-hover:#5b21b6;
+    --copy:#38bdf8;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Arial, sans-serif;}
+
+  body{
+    min-height:100vh;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+  }
+
+  .card{
+    width:360px;
+    backdrop-filter:blur(12px);
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    border-radius:18px;
+    padding:20px;
+    color:white;
+    box-shadow:0 0 30px rgba(0,0,0,0.25);
+  }
+
+  .title{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:12px;
+  }
+
+  .result-wrap{
+    display:flex;
+    gap:10px;
+    margin-bottom:16px;
+  }
+
+  .result{
+    flex:1;
+    background:rgba(255,255,255,0.25);
+    padding:12px;
+    border-radius:10px;
+    font-family:monospace;
+    font-size:15px;
+    letter-spacing:1px;
+    backdrop-filter:blur(6px);
+  }
+
+  .copy-btn{
+    background:var(--copy);
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+  }
+  .copy-btn:hover{background:#0ea5e9;}
+
+  .label{
+    font-size:14px;
+    margin-bottom:8px;
+    opacity:0.85;
+  }
+
+  .slider-wrap{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:15px;
+  }
+  .length-value{
+    background:rgba(255,255,255,0.2);
+    padding:6px 10px;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:700;
+  }
+
+  input[type="range"]{
+    flex:1;
+    appearance:none;
+    height:6px;
+    border-radius:10px;
+    background:#ddd;
+    outline:none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    appearance:none;
+    width:18px;height:18px;
+    background:white;
+    border-radius:50%;
+    border:3px solid var(--button);
+  }
+
+  .options{margin-bottom:15px;}
+  .opt{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:6px;
+    font-size:15px;
+  }
+  .opt input{transform:scale(1.2);cursor:pointer;}
+
+  .generate{
+    width:100%;
+    padding:12px;
+    background:var(--button);
+    border:none;
+    border-radius:12px;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.25s;
+  }
+  .generate:hover{
+    background:var(--button-hover);
+    transform:scale(1.02);
+  }
+
+  .toast{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    background:black;
+    padding:10px 18px;
+    border-radius:10px;
+    color:white;
+    opacity:0;
+    transition:0.3s;
+  }
+  .toast.show{
+    opacity:1;
+    bottom:45px;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="title">Password Generator</div>
+
+  <div class="result-wrap">
+    <div id="result" class="result">Click Generate</div>
+    <button id="copyBtn" class="copy-btn">Copy</button>
+  </div>
+
+  <div class="label">Password length</div>
+
+  <div class="slider-wrap">
+    <input id="length" type="range" min="4" max="30" value="10" />
+    <div class="length-value" id="lenVal">10</div>
+  </div>
+
+  <div class="options">
+    <label class="opt"><input type="checkbox" id="lower" checked> Include lowercase (a–z)</label>
+    <label class="opt"><input type="checkbox" id="upper" checked> Include uppercase (A–Z)</label>
+    <label class="opt"><input type="checkbox" id="numbers" checked> Include numbers (0–9)</label>
+    <label class="opt"><input type="checkbox" id="symbols" checked> Include symbols (!@#$)</label>
+  </div>
+
+  <button id="generate" class="generate">Generate</button>
+</div>
+
+<div id="toast" class="toast">Copied!</div>
+
+<script>
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const nums = "0123456789";
+  const syms = "!@#$%^&*()_+=-{}[]<>?/|";
+
+  const resultEl = document.getElementById("result");
+  const lengthEl = document.getElementById("length");
+  const lenVal = document.getElementById("lenVal");
+  const copyBtn = document.getElementById("copyBtn");
+  const toast = document.getElementById("toast");
+
+  lengthEl.oninput = () => lenVal.textContent = lengthEl.value;
+
+  function random(str){ return str[Math.floor(Math.random()*str.length)] }
+
+  function generate(){
+    let pool = "";
+    if(document.getElementById("lower").checked) pool += lower;
+    if(document.getElementById("upper").checked) pool += upper;
+    if(document.getElementById("numbers").checked) pool += nums;
+    if(document.getElementById("symbols").checked) pool += syms;
+
+    if(pool === ""){
+      alert("Select at least one option!");
+      return;
+    }
+
+    let pass = "";
+    for(let i=0;i<lengthEl.value;i++){
+      pass += random(pool);
+    }
+    resultEl.textContent = pass;
+  }
+
+  document.getElementById("generate").onclick = generate;
+
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(resultEl.textContent);
+    toast.classList.add("show");
+    setTimeout(()=>toast.classList.remove("show"),1200);
+  };
+
+  generate();
+</script>
+</body>
+</html>
